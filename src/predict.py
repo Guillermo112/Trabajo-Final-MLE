@@ -1,29 +1,20 @@
 ###################################
 # Sistema de Recomendacion (predict.py)
 ###################################
-
+import pandas as pd
+import pickle
+import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 # Import linear_kernel
 from sklearn.metrics.pairwise import linear_kernel
 
-# Stopwords
-
-def matrix_stopwords(df, feature):
-	tfidf = TfidfVectorizer(stop_words='english')
-        #Replace NaN with an empty string
-	df[feature] = df[feature].fillna('')
-	#Construct the required TF-IDF matrix by fitting and transforming the data
-	tfidf_matrix = tfidf.fit_transform(df[feature])
-	return tfidf_matrix
- 
-# Compute the cosine similarity matrix
-def matrix_similarity(matrix):
-	cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
-    cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
-    indices = pd.Series(netflix_overall.index, index=netflix_overall['title']).drop_duplicates()
 
 #Sistema de Recomendacion
-def get_recommendations(title, cosine_sim=cosine_sim):
+def get_recommendations(title, cosine_sim):
+
+    filledna = pd.read_csv(os.path.join('../data/processed/netflix_train.csv'))
+    indices = pd.Series(filledna.index, index=filledna['title'])
+    
     idx = indices[title]
 
     # Get the pairwsie similarity scores of all movies with that movie
@@ -39,10 +30,29 @@ def get_recommendations(title, cosine_sim=cosine_sim):
     movie_indices = [i[0] for i in sim_scores]
 
     # Return the top 10 most similar movies
-    return netflix_overall['title'].iloc[movie_indices]
+    return filledna['title'].iloc[movie_indices]
+
+def score_model(filename):
+    
+    df = pd.read_csv(os.path.join('../data/processed', filename))
+    print(filename, ' cargado correctamente')
+    # Leemos el modelo entrenado para usarlo
+    package = '../models/best_model.pkl'
+    model = pickle.load(open(package, 'rb'))
+    print('Modelo importado correctamente')
+    # Predecimos sobre las recomendaciones    
+
+    for a in df['title']:
+        res = get_recommendations(a,cosine_sim=model)
+        res.to_csv(os.path.join('../data/scores/', a))
+        print(res)
+    
+    print('Las recomendaciones se ha exportado correctamente en la carpeta scores')
+    
 
 def main():
-	tfidf_matrix = matrix_stopwords('netflix_train.csv', ['description'])	
+    score_model('netflix_test.csv')
+	
 
 if __name__ == "__main__":
     main()

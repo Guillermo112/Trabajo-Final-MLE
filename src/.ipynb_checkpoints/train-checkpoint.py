@@ -1,4 +1,4 @@
-# Código de Entrenamiento - Modelo de Riesgo de Default en un Banco de Corea
+# Código de Entrenamiento - Modelo de Recomendación de Peliculas
 ############################################################################
 import pandas as pd
 # import xgboost as xgb
@@ -6,34 +6,39 @@ import pickle
 import os
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+def clean_data(x):
+    return str.lower(x.replace(" ", ""))
+
+def create_soup(x):
+    return x['title']+ ' ' + x['director'] + ' ' + x['cast'] + ' ' +x['listed_in']+' '+ x['description']
 
 # Cargar la tabla transformada
 def read_file_csv(filename):
     df = pd.read_csv(os.path.join('../data/processed', filename))
-    X_train = df
-    #X_train = df.drop(['DEFAULT'],axis=1)
-    #y_train = df[['DEFAULT']]
+    
     print(filename, ' cargado correctamente')
-    # Entrenamos el modelo con toda la muestra
-    # print(df.columns())
-    #Removiendo stopwords
-    tfidf = TfidfVectorizer(stop_words='english')
-    #Replace NaN with an empty string
-    X_train['description'] = X_train['description'].fillna('')  
-    #Construct the required TF-IDF matrix by fitting and transforming the data
-    tfidf_matrix = tfidf.fit_transform(X_train['description'])
-    #Output the shape of tfidf_matrix
-    tfidf_matrix.shape
     
-    # Compute the cosine similarity matrix
-    cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
+    features=['title','director','cast','listed_in','description']
+    filledna=df[features]
+    filledna=filledna.fillna('')
+    for feature in features:
+        filledna[feature] = filledna[feature].apply(clean_data)
+    filledna['soup'] = filledna.apply(create_soup, axis=1)
 
-    indices = pd.Series(X_train.index, index=X_train['title']).drop_duplicates()
-    
+    count = CountVectorizer(stop_words='english')
+    count_matrix = count.fit_transform(filledna['soup'])
+
+    cosine_sim2 = cosine_similarity(count_matrix, count_matrix)
+    filledna=filledna.reset_index()
+    indices = pd.Series(filledna.index, index=filledna['title'])  
+      
     print('Modelo entrenado')
     # Guardamos el modelo entrenado para usarlo en produccion
     package = '../models/best_model.pkl'
-    pickle.dump(cosine_sim, open(package, 'wb'))
+    pickle.dump(cosine_sim2, open(package, 'wb'))
     print('Modelo exportado correctamente en la carpeta models')
 
 def get_recommendations(title, cosine_sim):

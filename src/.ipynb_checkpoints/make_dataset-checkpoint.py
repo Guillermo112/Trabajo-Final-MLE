@@ -41,6 +41,9 @@ def main():
     # lectura de titulos de peliculas
     df3 = read_file_csv('IMDb movies.csv')
     data_exporting(df3,['title','year','genre'],'netflix_movies_train.csv')
- 
+    # lectura de la lista de titulos
+    df4 = read_file_csv('Predict_Title.csv')
+    data_exporting(df4,['title'],'netflix_test.csv')
+     
 if __name__ == "__main__":
     main()
