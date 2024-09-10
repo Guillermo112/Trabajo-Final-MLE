@@ -1,9 +1,7 @@
 # Código de Entrenamiento - Modelo de Riesgo de Default en un Banco de Corea
 ############################################################################
-
-
 import pandas as pd
-import xgboost as xgb
+# import xgboost as xgb
 import pickle
 import os
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -11,12 +9,13 @@ from sklearn.metrics.pairwise import linear_kernel
 
 # Cargar la tabla transformada
 def read_file_csv(filename):
-    df = pd.read_csv(os.path.join('../data/processed', filename)).set_index('ID')
-    X_train = df.drop(['DEFAULT'],axis=1)
-    y_train = df[['DEFAULT']]
+    df = pd.read_csv(os.path.join('../data/processed', filename))
+    X_train = df
+    #X_train = df.drop(['DEFAULT'],axis=1)
+    #y_train = df[['DEFAULT']]
     print(filename, ' cargado correctamente')
     # Entrenamos el modelo con toda la muestra
-
+    # print(df.columns())
     #Removiendo stopwords
     tfidf = TfidfVectorizer(stop_words='english')
     #Replace NaN with an empty string
@@ -37,7 +36,7 @@ def read_file_csv(filename):
     pickle.dump(cosine_sim, open(package, 'wb'))
     print('Modelo exportado correctamente en la carpeta models')
 
-def get_recommendations(title, cosine_sim=cosine_sim):
+def get_recommendations(title, cosine_sim):
     idx = indices[title]
     # Get the pairwsie similarity scores of all movies with that movie
     sim_scores = list(enumerate(cosine_sim[idx]))
@@ -53,7 +52,7 @@ def get_recommendations(title, cosine_sim=cosine_sim):
 
 # Entrenamiento completo
 def main():
-    read_file_csv('netflix_movies_train.csv')
+    read_file_csv('netflix_train.csv')
     print('Finalizó el entrenamiento del Modelo')
 
 
