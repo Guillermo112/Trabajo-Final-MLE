@@ -10,8 +10,11 @@ En el navegador, inicie sesión en Github. Luego, vaya al enlace del proyecto or
 ### Paso 2: Levantar el contenedor de Python
 
 ```
-docker run -it --rm -p 8888:8888 jupyter/pyspark-notebook
+docker run -it --rm -p 8888:8888 jupyter/scipy-notebook
+
 ```
+
+
 
 
 ### Paso 3: Configurar git
