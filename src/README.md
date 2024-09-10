@@ -34,7 +34,7 @@ git clone https://github.com/<USER>/Trabajo-Final-MLE.git
 ### Paso 5: Instalar los pre-requisitos
 
 ```
-cd model-credit/
+cd Trabajo-Final-MLE/
 
 pip install -r requirements.txt
 ```
